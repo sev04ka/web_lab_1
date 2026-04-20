@@ -3,3 +3,37 @@ name: deploy
 on:
   push:
     branches: [main]
+
+jobs:
+  build:
+    name: run dev container
+    runs-on: unbuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./firstlab
+          push: true
+          tags: firstlab:latest
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            docker pull firstlab:latest
+            docker stop lab1 || true
+            docker rm lab1 || true
+            docker run -d --name lab1 --restart unless-stopped -p 5173:5173 firstlab:latest
