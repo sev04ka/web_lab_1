@@ -36,4 +36,4 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
             sudo docker stop lab1 || true
             sudo docker rm lab1 || true
-            sudo docker run -d --name lab1 --restart unless-stopped -p 5173:5173 ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
+            sudo docker run -d --name lab1 --restart unless-stopped -p ${{ secrets.SERVER_HOST }}:5173:5173 ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
