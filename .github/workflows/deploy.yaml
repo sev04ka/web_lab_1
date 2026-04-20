@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -24,7 +24,7 @@ jobs:
         with:
           context: ./firstlab
           push: true
-          tags: firstlab:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1
@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull firstlab:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
             docker stop lab1 || true
             docker rm lab1 || true
-            docker run -d --name lab1 --restart unless-stopped -p 5173:5173 firstlab:latest
+            docker run -d --name lab1 --restart unless-stopped -p 5173:5173 ${{ secrets.DOCKERHUB_USERNAME }}/firstlab:latest
